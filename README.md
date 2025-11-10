@@ -23,6 +23,7 @@ and
 [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
 as fallback).
 * Supports exchange of awareness information (e.g. cursors).
+* **NEW**: Connection adapters for flexible transport mechanisms (WebSocket, Laravel Echo, custom adapters).
 
 ## Quick Start
 
@@ -99,6 +100,9 @@ wsOpts = {
   // You may polyill the Websocket object (https://developer.mozilla.org/en-US/docs/Web/API/WebSocket).
   // E.g. In nodejs, you could specify WebsocketPolyfill = require('ws')
   WebsocketPolyfill: Websocket,
+  // Specify a connection adapter for custom transport mechanisms
+  // E.g. LaravelEchoAdapter, or your own custom adapter
+  adapter: null,
   // Specify an existing Awareness instance - see https://github.com/yjs/y-protocols
   awareness: new awarenessProtocol.Awareness(ydoc),
   // Specify the maximum amount to wait between reconnects (we use exponential backoff).
@@ -136,6 +140,31 @@ wsOpts = {
   <b><code>wsProvider.on('connection-error', function(WSErrorEvent))</code></b>
   <dd>Fires when the underlying websocket connection closes with an error. It forwards the websocket event to this event handler.</dd>
 </dl>
+
+## Connection Adapters
+
+Y-websocket now supports connection adapters, allowing you to use different transport mechanisms beyond standard WebSocket connections.
+
+### Available Adapters
+
+- **WebSocketAdapter** (default) - Standard WebSocket protocol
+- **Custom adapters** - Create your own for any transport mechanism
+
+### Creating Custom Adapters
+
+```js
+import { BaseAdapter } from '@y/websocket/src/adapters'
+
+class MyCustomAdapter extends BaseAdapter {
+  connect(url, protocols) { /* your connection logic */ }
+  send(data) { /* your send logic */ }
+  close() { /* your cleanup logic */ }
+  get readyState() { return this._readyState }
+}
+
+const adapter = new MyCustomAdapter()
+const provider = new WebsocketProvider(null, null, doc, { adapter })
+```
 
 ## License
 
