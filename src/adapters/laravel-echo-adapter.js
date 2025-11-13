@@ -39,6 +39,7 @@ export class LaravelEchoAdapter extends BaseAdapter {
    * @param {Function} [options.onHere=null] - Callback when receiving initial users list
    * @param {Function} [options.onJoining=null] - Callback when a user joins
    * @param {Function} [options.onLeaving=null] - Callback when a user leaves
+   * @param {boolean} [options.optimizeSingleUser=true] - Skip sending when only one user in channel
    */
   constructor (
     echo,
@@ -50,7 +51,8 @@ export class LaravelEchoAdapter extends BaseAdapter {
       awarenessEvent = 'yjs-awareness',
       onHere = null,
       onJoining = null,
-      onLeaving = null
+      onLeaving = null,
+      optimizeSingleUser = true
     } = options
     super()
     this.echo = echo
@@ -60,6 +62,7 @@ export class LaravelEchoAdapter extends BaseAdapter {
     this.onHereCallback = onHere
     this.onJoiningCallback = onJoining
     this.onLeavingCallback = onLeaving
+    this.optimizeSingleUser = optimizeSingleUser
     this.channel = null
     /** @type {number} */
     this._readyState = BaseAdapter.CLOSED
@@ -327,7 +330,15 @@ export class LaravelEchoAdapter extends BaseAdapter {
    * @private
    */
   _canSend () {
-    return this._readyState === BaseAdapter.OPEN && this.channel !== null && this.usersInChannel.size > 1
+    if (this._readyState !== BaseAdapter.OPEN || this.channel === null) {
+      return false
+    }
+    // If optimization is enabled, only send when there are multiple users
+    if (this.optimizeSingleUser) {
+      return this.usersInChannel.size > 1
+    }
+    // If optimization is disabled, always allow sending when connected
+    return true
   }
 
   /**

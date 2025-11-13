@@ -59,6 +59,12 @@ export interface LaravelEchoAdapterOptions {
    * Callback when a user leaves the channel
    */
   onLeaving?: ((user: LaravelEchoUser) => void) | null
+  
+  /**
+   * Optimize by not sending messages when only one user is in the channel
+   * @default true
+   */
+  optimizeSingleUser?: boolean
 }
 
 /**
